@@ -7,36 +7,47 @@ Criação e Configuração Base de um cluster k8s
 - [ ] Definição de como os hosts irá ser passados (env?)
 - [ ] Arquivo admin.conf para o kubectl
 - [ ] Aplicação Manual dos service (com kubectl)
-- [x] Ordem de aplicação
-  - k8s/all.yml
-  - k8s/master.yml
-  - k8s/worker.yml
+- [ ] Validação do sysctl after restart
+  - sysctl net.ipv4.ip_forward
+- [ ] Ordem de aplicação:
+  - [ ] Todas as maquinas 
+    - k8s/all.yml
+  - [ ] Apenas master
+    - k8s/master.yml
+  - [ ] Apenas workers
+    - k8s/worker.yml
 - [ ] Comando unico de execução
 
 ## K8s
 
 Pasta de arquivos ansible para o cluster k8s
 
-- [k8s/docker](k8s/docker.yml)
+- [k8s/contanerd](k8s/contanerd.yml)
   - [x] instalação dos pre requisitos
-  - [x] chave gpg e repositorio
-  - [x] instalação docker e containerd
+  - [x] chave gpg e repositorio docker
+  - [x] instalação contanerd
 
 - [k8s/all](k8s/all.yml)
-  - [x] importação do play docker.yml
-  - [ ] instalação dos pre requisitos k8s
-  - [ ] instalação dos pakages k8s
-  - [ ] instalação do docker-cni
+  - [x] importação do play containerd.yml
+  - [x] desabilitar o swap
+  - [x] instalação dos pre requisitos k8s
+  - [x] instalação e fixar versão dos pakages k8s
+  - [x] habilitar e inicializar o kubelet
 
 - [k8s/master](k8s/master.yml)
   - [x] inicializa o cluster
   - [x] gera o arquivo join.sh
-  - [x] gera o arquivo adm.conf
+  - [x] gera o arquivo admin.conf
   - [x] aplica o Flannel (pod network)
 
 - [k8s/worker](k8s/worker.yml)
-  - [ ] copia o arquivo join.sh para os workers
-  - [ ] executa o arquivo join.sh
+  - [x] copia o arquivo join.sh para os workers
+  - [x] executa o arquivo join.sh
+
+- [k8s/firewall]
+  - [ ] adicionar a permissão explicita para 0.0.0.0 na porta 22 para continuar com o acesso
+  - [ ] abrir portas de acordo com a documentação: https://kubernetes.io/docs/reference/networking/ports-and-protocols/
+  - [ ] definir regra padrão para todas as tabelas como negar acesso
 
 ## Service
 
@@ -44,3 +55,4 @@ Deployments de aplicações opcionais para o funcionamento do cluster
 
 - [ ] [service/ingress](service/ingress.yml)
 - [ ] [service/portainer](service/portainer.yml)
+- [ ] [service/nginx-test](service/nginx.test.yml)

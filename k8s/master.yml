@@ -1,26 +1,26 @@
 - name: K8S Init
   command: kubeadm init
 
-- name: K8S Generate token for join.sh
+- name: K8S Master Generate token for join.sh
   command: kubeadm token create --print-join-command
   register: kubeadm_join_sh
 
-- name: K8S Generate join.sh
+- name: K8S Master Generate join.sh
   copy:
     content: "{{ kubeadm_join_sh.stdout }}"
     dest: /root/join.sh
 
-- name: K8S Get join.sh
+- name: K8S Master Get join.sh
   fetch:
     dest: ./join.sh
     src: /root/join.sh
 
-- name: K8S Get admin.conf
+- name: K8S Master Get admin.conf
   fetch:
     dest: ./admin.conf
     src: /etc/kubernetes/admin.conf
 
-- name: K8S Install pod network
+- name: K8S Master Install pod network
   command: kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf

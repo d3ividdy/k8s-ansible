@@ -1,1 +1,74 @@
-- import_playbook: docker.yml
+- name: K8S install prereqs
+  apt:
+    update_cache: yes
+    name: "{{ item }}"
+  loop:
+    - nfs-common
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gpg
+    - gnupg2
+    - software-properties-common
+
+- name: K8S modules for sysctl
+  sysctl:
+    name: "{{ item }}"
+    value: '1'
+    state: present
+  loop:
+    - net.ipv6.conf.all.disable_ipv6
+    - net.ipv6.conf.default.disable_ipv6
+    - net.ipv6.conf.lo.disable_ipv6
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-ip6tables
+    - net.ipv4.ip_forward
+
+- name: K8S load modules kernel
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
+- name: K8S Disable Swap
+  command: swapoff -a && sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+- import_playbook: contained.yml
+
+- name: K8S add keyring
+  command: mkdir -m 755 -p /etc/apt/keyrings && curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+- name: K8S add gpg key
+  apt_key:
+    url: https://pkgs.k8s.io/core:/stable:/v1.30/deb/
+    state: present
+
+- name: K8S add repository
+  apt_repository:
+    repo: deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/
+
+- name: K8S install cluster packages
+  apt:
+    update_cache: yes
+    name: "{{ item }}"
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+
+- name: K8S fix version cluster packages
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+
+- name: K8S start and enable kubelet
+  ansible.builtin.systemd_service:
+    state: start
+    enabled: true
+    name: kubelet

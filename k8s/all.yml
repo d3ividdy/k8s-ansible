@@ -35,7 +35,7 @@
 - name: K8S Disable Swap
   command: swapoff -a && sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
-- import_playbook: contained.yml
+- import_playbook: containerd.yml
 
 - name: K8S add keyring
   command: mkdir -m 755 -p /etc/apt/keyrings && curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg

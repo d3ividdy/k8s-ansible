@@ -22,10 +22,10 @@ Criação e Configuração Base de um cluster k8s
 
 Pasta de arquivos ansible para o cluster k8s
 
-- [k8s/contanerd](k8s/contanerd.yml)
+- [k8s/containerd](k8s/containerd.yml)
   - [x] instalação dos pre requisitos
   - [x] chave gpg e repositorio docker
-  - [x] instalação contanerd
+  - [x] instalação containerd
 
 - [k8s/all](k8s/all.yml)
   - [x] importação do play containerd.yml

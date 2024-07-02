@@ -1,0 +1,5 @@
+[k8s-master]
+# host master
+
+[k8s-worker]
+# hosts workers

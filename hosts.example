@@ -1,5 +1,8 @@
-[k8s-master]
+[all:vars]
+# config for all hosts
+
+[master]
 # host master
 
-[k8s-worker]
+[workers]
 # hosts workers

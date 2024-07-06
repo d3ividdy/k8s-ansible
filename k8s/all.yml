@@ -1,6 +1,13 @@
+- name: K8S paths
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "/etc/apt/keyrings"
+    - "/etc/containerd"
+
 - name: K8S install prereqs
   apt:
-    update_cache: yes
     name: "{{ item }}"
   loop:
     - nfs-common
@@ -10,6 +17,14 @@
     - gpg
     - gnupg2
     - software-properties-common
+
+- name: K8S load modules kernel
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
 
 - name: K8S modules for sysctl
   sysctl:
@@ -24,34 +39,27 @@
     - net.bridge.bridge-nf-call-ip6tables
     - net.ipv4.ip_forward
 
-- name: K8S load modules kernel
-  modprobe:
-    name: "{{ item }}"
-    state: present
-  loop:
-    - overlay
-    - br_netfilter
-
 - name: K8S Disable Swap
   command: swapoff -a && sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+  ignore_errors: true
 
-- import_playbook: containerd.yml
+- ansible.builtin.include_tasks: containerd.yml
 
 - name: K8S add keyring
-  command: mkdir -m 755 -p /etc/apt/keyrings && curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  shell: |
+    curl -fsSL https://pkgs.k8s.io/core:/stable:/{{ KUBE_VERSION }}/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
 - name: K8S add gpg key
   apt_key:
-    url: https://pkgs.k8s.io/core:/stable:/v1.30/deb/
+    file: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
     state: present
 
 - name: K8S add repository
   apt_repository:
-    repo: deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/
+    repo: "deb [arch=amd64] https://pkgs.k8s.io/core:/stable:/{{ KUBE_VERSION }}/deb/ /"
 
 - name: K8S install cluster packages
   apt:
-    update_cache: yes
     name: "{{ item }}"
   loop:
     - kubelet
@@ -69,6 +77,6 @@
 
 - name: K8S start and enable kubelet
   ansible.builtin.systemd_service:
-    state: start
+    state: started
     enabled: true
     name: kubelet

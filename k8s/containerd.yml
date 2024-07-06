@@ -9,14 +9,10 @@
 
 - name: ContainerD install
   apt:
-    update_cache: yes
-    name: "{{ item }}"
-  loop:
-    - cri-tools
-    - containerd.io
+    name: containerd.io
 
 - name: ContainerD generate default config
-  command: mkdir -p /etc/containerd && containerd config default > /etc/containerd/config.toml
+  command: containerd config default > /etc/containerd/config.toml
 
 - name: ContainerD Config SystemdCgroup
   command: sed -i 's/ SystemdCgroup = false/ SystemdCgroup = true/' /etc/containerd/config.toml

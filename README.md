@@ -2,26 +2,6 @@
 
 Criação e Configuração Base de um cluster k8s
 
-## TODO
-
-- [ ] Arquivo admin.conf para o kubectl
-- [ ] Aplicação Manual dos service (com kubectl)
-- [ ] Validação do sysctl after restart
-  - sysctl net.ipv4.ip_forward
-- [ ] Ordem de aplicação:
-  - [x] Todas as maquinas 
-    - k8s/all.yml
-  - [ ] Apenas master
-    - k8s/master.yml
-  - [ ] Apenas workers
-    - k8s/worker.yml
-  - [ ] Post Install
-    - k8s/post.yml
-  - [ ] Firewall Master
-    - k8s/fw-master.yml
-  - [ ] Firewall Workers
-    - k8s/fw-workers.yml
-
 ## Apply
 
 ```sh
@@ -31,6 +11,12 @@ cp vars.example.yml vars.yml
 
 # apply cluster
 ansible-playbook site.yml
+
+# local
+mkdir -p ~/.kube && cp k8s/files/admin.conf ~/.kube/config
+
+# set labels workers
+kubectl label node $(kubectl get nodes | grep "<none>" | awk '{print $1}') node-role.kubernetes.io/worker=true
 ```
 
 ## K8s

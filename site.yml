@@ -16,7 +16,7 @@
     - name: Include Vars
       ansible.builtin.include_vars:
         file: vars.yml
-    
+   
     - name: Apply k8s master config
       ansible.builtin.include_tasks: k8s/master.yml
 
@@ -28,3 +28,38 @@
 
     - name: Apply k8s worker config
       ansible.builtin.include_tasks: k8s/worker.yml
+
+- hosts: master
+  tasks:
+    - name: Download Helm installation script
+      get_url:
+        url: https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+        dest: /tmp/get_helm.sh
+        mode: '0755'
+
+    - name: Run Helm installation script
+      command: /tmp/get_helm.sh
+      args:
+        creates: /usr/local/bin/helm
+      register: helm_install_result
+      changed_when: false
+
+    - name: Add /usr/local/bin to PATH
+      lineinfile:
+        path: ~/.bashrc
+        line: 'export PATH=$PATH:/usr/local/bin'
+      when: helm_install_result.rc == 0
+    
+    - name: Copy traefik values
+      copy:
+        dest: /tmp
+        src: ./service/traefik-values.yml
+        mode: '0755'
+
+    - name: Helm add and install traefik
+      shell: |
+        helm repo add traefik https://traefik.github.io/charts
+        helm repo update
+        helm install traefik traefik/traefik --namespace kube-system --values /tmp/traefik-values.yml
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf

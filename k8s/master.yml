@@ -1,5 +1,5 @@
 - name: K8S Init
-  command: kubeadm init
+  command: kubeadm init --apiserver-advertise-address={{ IP_MASTER }} --apiserver-bind-port=6443 --pod-network-cidr=10.244.0.0/16
 
 - name: K8S Master Generate token for join.sh
   command: kubeadm token create --print-join-command
@@ -10,15 +10,21 @@
     content: "{{ kubeadm_join_sh.stdout }}"
     dest: /root/join.sh
 
-- name: K8S Master Get join.sh
+- name: K8S Master Get to Local Files
   fetch:
-    dest: ./join.sh
-    src: /root/join.sh
+    src: "{{ item }}"
+    dest: ./k8s/files
+  loop:
+    - /root/join.sh
+    - /etc/kubernetes/admin.conf
 
-- name: K8S Master Get admin.conf
-  fetch:
-    dest: ./admin.conf
-    src: /etc/kubernetes/admin.conf
+- name: K8S Master organize local files
+  shell: |
+    cp k8s/files/{{ IP_MASTER }}/etc/kubernetes/admin.conf k8s/files
+    cp k8s/files/{{ IP_MASTER }}/root/join.sh k8s/files
+    rm -rf k8s/files/{{ IP_MASTER }}
+  become: false
+  delegate_to: localhost
 
 - name: K8S Master Install pod network
   command: kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml

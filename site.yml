@@ -1,11 +1,30 @@
 - hosts: all
-  vars:
-    KUBE_VERSION: "v1.30"
-    FLANNEL_VERSION: ""
   tasks:
+    - name: Include Vars
+      ansible.builtin.include_vars:
+        file: vars.yml
+
     - name: Set Hostname
       hostname:
         name: "{{ hostname }}"
 
     - name: Apply k8s all config
       ansible.builtin.include_tasks: k8s/all.yml
+
+- hosts: master
+  tasks:
+    - name: Include Vars
+      ansible.builtin.include_vars:
+        file: vars.yml
+    
+    - name: Apply k8s master config
+      ansible.builtin.include_tasks: k8s/master.yml
+
+- hosts: workers
+  tasks:
+    - name: Include Vars
+      ansible.builtin.include_vars:
+        file: vars.yml
+
+    - name: Apply k8s worker config
+      ansible.builtin.include_tasks: k8s/worker.yml

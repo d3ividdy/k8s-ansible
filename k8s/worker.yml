@@ -1,8 +1,8 @@
 - name: K8S Worker copy join.sh
   copy:
-    dest: /tmp/join.sh
-    src: ./join.sh
+    dest: /tmp
+    src: ./k8s/files/join.sh
     mode: '0700'
 
 - name: K8S Worker run join.sh
-  shell:  /tmp/join.sh
+  shell: /tmp/join.sh

@@ -4,19 +4,34 @@ Criação e Configuração Base de um cluster k8s
 
 ## TODO
 
-- [ ] Definição de como os hosts irá ser passados (env?)
 - [ ] Arquivo admin.conf para o kubectl
 - [ ] Aplicação Manual dos service (com kubectl)
 - [ ] Validação do sysctl after restart
   - sysctl net.ipv4.ip_forward
 - [ ] Ordem de aplicação:
-  - [ ] Todas as maquinas 
+  - [x] Todas as maquinas 
     - k8s/all.yml
   - [ ] Apenas master
     - k8s/master.yml
   - [ ] Apenas workers
     - k8s/worker.yml
-- [ ] Comando unico de execução
+  - [ ] Post Install
+    - k8s/post.yml
+  - [ ] Firewall Master
+    - k8s/fw-master.yml
+  - [ ] Firewall Workers
+    - k8s/fw-workers.yml
+
+## Apply
+
+```sh
+# create local files
+cp hosts.example hosts
+cp vars.example.yml vars.yml
+
+# apply cluster
+ansible-playbook site.yml
+```
 
 ## K8s
 
@@ -43,6 +58,9 @@ Pasta de arquivos ansible para o cluster k8s
 - [k8s/worker](k8s/worker.yml)
   - [x] copia o arquivo join.sh para os workers
   - [x] executa o arquivo join.sh
+
+- [k8s/post](k8s/post.yml)
+  - [ ] definição de labels Master/Workers
 
 - [k8s/firewall]
   - [ ] adicionar a permissão explicita para 0.0.0.0 na porta 22 para continuar com o acesso

@@ -6,6 +6,10 @@
     - "/etc/apt/keyrings"
     - "/etc/containerd"
 
+- name: K8S Update package cache
+  ansible.builtin.package:
+    update_cache: true
+
 - name: K8S install prereqs
   apt:
     name: "{{ item }}"
@@ -40,8 +44,9 @@
     - net.ipv4.ip_forward
 
 - name: K8S Disable Swap
-  command: swapoff -a && sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
-  ignore_errors: true
+  shell: |
+    swapoff -a
+    sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
 - ansible.builtin.include_tasks: containerd.yml
 
@@ -75,8 +80,7 @@
     - kubeadm
     - kubectl
 
-- name: K8S start and enable kubelet
+- name: K8S enable kubelet
   ansible.builtin.systemd_service:
-    state: started
     enabled: true
     name: kubelet

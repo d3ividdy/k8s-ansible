@@ -1,8 +1,15 @@
 [all:vars]
 # config for all hosts
 
+[master:vars]
+#ansible_become                  = true
+
 [master]
-# host master
+# 0.0.0.0 hostname=master
+
+[workers:vars]
+#ansible_become                  = true
 
 [workers]
-# hosts workers
+#0.0.0.0 hostname=worker-01
+#0.0.0.0 hostname=worker-02
